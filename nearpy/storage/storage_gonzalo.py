@@ -1,0 +1,125 @@
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2013 Ole Krause-Sparmann
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2013 Ole Krause-Sparmann
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+#import redis
+import json
+import pickle
+import numpy
+import os
+
+from nearpy.storage.storage import Storage
+
+
+class GonzaloStorage(Storage):
+    """ Storage using files. """
+
+    def __init__(self):
+        """ Uses specified redis object for storage. """
+        #self.gonzalo_object = gonzalo_object
+	self.buckets = {}
+
+    def store_vector(self, hash_name, bucket_key, v, data):
+        """
+        Stores vector and JSON-serializable data in bucket with specified key.
+        """
+        currentkey = 'nearpy_%s_%s' % (hash_name, bucket_key)	
+
+        if not currentkey in self.buckets:
+         self.buckets[currentkey] = []
+
+
+        # Make sure it is a 1d vector
+        #v = numpy.reshape(v, v.shape[0])
+	
+	#save in memory only, saving to disk is missing !
+        self.buckets[currentkey].append((v, data))
+
+    def save_all(self):
+        """
+        Store all the keys as files.
+        """
+	directory= os.path.join(os.getcwd(), "hash_tables")
+       	if not os.path.exists(directory):
+             os.makedirs(directory)
+	
+	for current_key in self.buckets:
+	     try:
+	   	print current_key
+	   	filename= os.path.join(directory,current_key)
+	   	fp = open(filename, 'w')
+		pickle.dump(self.buckets[current_key], fp)
+		fp.close()
+	     except:
+		print "Couldn't open %s to read LSH Index" % (filename)
+		traceback.print_exc(file=sys.stderr)
+		
+
+
+    def get_bucket(self, hash_name, bucket_key):
+        """
+        Returns bucket content as list of tuples (vector, data).
+        """
+        current_key= 'nearpy_%s_%s' % (hash_name, bucket_key)
+
+	directory= os.path.join(os.getcwd(), "hash_tables")
+	
+	if not os.path.exists(directory):
+    	  os.makedirs(directory)
+
+	filename= os.path.join(directory,current_key)
+	
+	if current_key in self.buckets:
+                return self.buckets[current_key]
+	else:
+		#load from file
+		try:
+			fp = open(filename, 'r')
+			ind = pickle.load(fp)
+			fp.close()
+			return ind
+		except:
+			print "Couldn't open %s to read LSH Index" % (filename)
+			traceback.print_exc(file=sys.stderr)
+			
+
+
+    def clean_buckets(self, hash_name, bucket_key):
+        """
+        Removes all buckets and their content for specified hash.
+        """
+	currentkey = 'nearpy_%s_%s' % (hash_name, bucket_key)
+	del self.buckets[currentkey] 
+        
+	
+    def clean_all_buckets(self):
+        """
+        Removes all buckets from all hashes and their content.
+        """
+	self.buckets[:] = []
+	self.buckets = None

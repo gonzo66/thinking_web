@@ -1,0 +1,236 @@
+/*
+      Mahdi M. Kalayeh 
+
+This CSS is mainly borrowed from Tomasz Malisiewicz  people.csail.mit.edu/tomasz/index.html
+  
+*/
+
+body {
+	margin:30px;
+	background-color: #becdd6; /*#6F9CCE*/
+	font-family: 'Maven Pro';
+	font-size:13pt;
+	font-weight:normal;
+	text-align : center;
+	color:#333;
+	overflow-x: auto;
+	overflow-y: scroll;	/* so the div doesn't move around depending 
+				   on whether it's tall enough to have a scrollbar */
+}
+
+@font-face {
+  font-family: 'Oldenburg';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Oldenburg'), local('Oldenburg-Regular'), url(http://themes.googleusercontent.com/static/fonts/oldenburg/v2/CRS5ubi7Czjub7bFdKPY-T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Oxygen';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Oxygen'), local('Oxygen-Regular'), url(http://themes.googleusercontent.com/static/fonts/oxygen/v3/RzoNiRR1p2Mqyyz2RwqSMw.woff) format('woff');
+}
+
+
+@font-face {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Ubuntu'), url(http://themes.googleusercontent.com/static/fonts/ubuntu/v5/_xyN3apAT_yRRDeqB3sPRg.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Maven Pro';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Maven Pro Regular'), local('MavenProRegular'), url(http://themes.googleusercontent.com/static/fonts/mavenpro/v5/MG9KbUZFchDs94Tbv9U-pT8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
+}
+
+
+@font-face {
+  font-family: 'Sorts Mill Goudy';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Sorts Mill Goudy Regular'), local('SortsMillGoudy-Regular'), url(http://themes.googleusercontent.com/static/fonts/sortsmillgoudy/v4/JzRrPKdwEnE8F1TDmDLMUkQF8YaxoHnTBii2CPCdpvk.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'Great Vibes';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Great Vibes'), local('GreatVibes-Regular'), url(http://themes.googleusercontent.com/static/fonts/greatvibes/v2/6q1c0ofG6NKsEhAc2eh-3YbN6UDyHWBl620a-IRfuBk.woff) format('woff');
+}
+
+a {
+	text-decoration: none;
+	color:          #385792;
+	font-family: 'Maven Pro';
+}
+
+
+
+a:hover {
+	color:			#6F9CCE;
+}
+
+table { 
+	/*
+        font-size: 100%;
+	font-family: 'MyriadProLight';
+	*/
+/*
+  font-size: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  font-variant: inherit;
+	font-family: inherit;
+*/
+}
+
+.titletext {
+	color:#111;
+	font-size:30pt;
+	font-weight:normal;
+	text-align : left;
+	padding: 15px 0px;
+	font-family: 'Oldenburg';
+	/* font-variant: small-caps; */
+}
+
+.container700 {
+	width: 950px;
+	margin:0 auto;	/* used to center the div (known hack for IE) */
+	text-align: left;
+	border-style:solid;
+	border-width:2px;
+	border-color:#333;
+	background:#FFF;
+	padding: 0px 30px 30px 30px;
+	border-radius: 7px;
+	-webkit-border-radius: 7px;
+	-moz-border-radius: 7px;
+	box-shadow: 10px 10px 30px #333333;
+	-webkit-box-shadow: 10px 10px 30px #333333;
+	-moz-box-shadow: 10px 10px 30px #333333;
+}
+
+.pubs {
+	font-size:8pt;
+}
+
+.content {
+	margin-left:60px;
+    margin-right:60px;
+	padding: 0px 0px 0px 30px;
+}
+
+.picture-border {
+	border: 2px solid rgb(51, 51, 51);
+	margin-left: 15px;
+	float: right;
+}
+
+#section-links {
+	float: left; 
+	width: 150px;
+	background:#FFF;
+    text-align:     left;
+        font-size: 140%;
+/*    border-right:   1px solid #aac; */
+}
+
+#section-links div.sectionContainer {
+    padding:        0px; /* 30px 0 0;*/
+}
+
+#section-links div.section {
+    padding:        0;
+}
+
+#section-links div.selected {
+    /*font-weight: bold;*/
+}
+
+
+.bottom {
+	clear:	left;
+}
+
+.photo {
+	margin-left: 30px;
+}
+
+.frontpage-paper-container
+{
+	margin-top: 1.0em;
+	border-collapse: collapse;
+	padding: 0px;
+}
+
+.frontpage-paper-container td {
+	vertical-align: top;
+}
+
+.frontpage-paper-container .author {
+	color: gray;
+}
+
+.frontpage-paper-container .venue {
+	color: #333333;
+/*	font-style: italic;*/
+}
+
+.frontpage-paper-container .paper-image {
+	width: 200px;
+	height: 160px;
+	border: 2px solid rgb(51, 51, 51);
+	margin-right: 5px;
+}
+
+.talk {
+	font-size: 80%;
+	line-height: 100%;
+}
+
+.talk .date {
+    font-size: 90%;
+}
+
+.talk tr {
+    vertical-align: top;
+}
+
+.old {
+    color: #aaaaaa;
+}
+
+.paper-title {
+	/*font-weight: bold;*/
+	font-family: 'Maven Pro';
+}
+
+.paper-image {
+	float: none;
+	margin: 0px 15px 0px 0px;
+}
+
+h2 {
+	font-family: 'Maven Pro';
+}
+
+.publication-lens .publication-title {
+	font-family: 'Maven Pro';
+}
+
+.lowercase-number {
+	font-size: 80%;
+}
+
+.award {
+	font-variant: small-caps;
+	color: #CA8082;
+}
+
+
+
