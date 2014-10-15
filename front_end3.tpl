@@ -1,8 +1,8 @@
 <html lang="en" class="no-js one-page-layout" data-classic-layout="false" data-mobile-only-classic-layout="true" data-inanimation="fadeInUp" data-outanimation="fadeOutDownBig"><!-- InstanceBegin template="/Templates/layout.dwt" codeOutsideHTMLIsLocked="false" --><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="description" content="cvCard - Responsive HTML5 vCard Template">
-<meta name="keywords" content="vcard, html5, portfolio">
+<meta name="description" content="Sstem for retrieve images from multiple queries">
+<meta name="keywords" content="Thinking with words, Image retrieval, multiple Image">
 <meta name="author" content="Pixelwars">
 
 <link rel="stylesheet" href="static//style.css" type="text/css">

@@ -2,6 +2,7 @@ from bottle import route, run, template
 from bottle import static_file
 from bottle import route, request, response
 from bottle import redirect
+from bottle import get, post, request
 import os
 import caffe
 from matplotlib import pyplot
@@ -48,6 +49,11 @@ CROP_MODES = ['list', 'center_only', 'corners', 'selective_search']
 
 contents=sio.loadmat('/home/ashan/gonzalo/ECCV2014/BingChallenge/word_frequency.mat')
 freq=contents['freq']
+
+contents=sio.loadmat('/home/ashan/gonzalo/ECCV2014/BingChallenge/vocab.mat')
+vocab=contents['vocab']
+
+exclude=[0, 1, 2, 3, 4, 5, 8, 14, 15, 4, 121, 258, 677, 994, 1200, 1593, 1711, 2057, 2063, 2138, 2426, 3083, 5725, 13392, 14466, 15682, 16859, 23150, 23221, 46377, 58586]
 
 # Think definitions
 #load textual representation of the input vocabulary %BoWT is an array of  78K x 1M
@@ -448,6 +454,13 @@ def clear():
     return show_example()
 
 
+#clear the cookies for the current user
+@route('/clear')
+def clear2():
+   # response.set_cookie('counter', '0')
+   # response.set_cookie('querys', '')
+   # num_queries=len(querystext)
+    return show_example()
 
 
 
@@ -476,7 +489,7 @@ def do_upload():
     response.set_cookie('counter', str(count))
     response.set_cookie('querys', querys)
     querystext = querys.split(',')
-    num_queries=len(querystext)
+    #num_queries=len(querystext)
 
     # obtain feature using CNN
     # save_path='/queries/img9.jpg'
@@ -554,25 +567,50 @@ def do_upload():
     distancestext = distances.split('*')
     #NNs=numpy.zeros(shape=(num_queries,20))
     #distances=numpy.zeros(shape=(num_queries,20))
-    NNs=[]    
+    NNs=[]
+    NNs2=[]    
     distances=[]
+     # Added to see the labels of the found images
+    candidates=[]
+    cand_representation=[]
     
     for iQuery in range(len(NNtext)):
-	NNs.append([])
-	distances.append([])       	
-	queryNN=NNtext[iQuery]
-	querydistances=distancestext[iQuery]
-	NNdetails = queryNN.split(',')
-	distancesdetails = querydistances.split(',')
+        NNs.append([])
+        NNs2.append([])
+        distances.append([])       	
+        queryNN=NNtext[iQuery]
+        querydistances=distancestext[iQuery]
+        NNdetails=queryNN.split(',')
+        distancesdetails=querydistances.split(',')
         for iNN in range(len(NNdetails)):
-		temp=NNdetails[iNN]
-		temp2=temp.split('_')
-		toadd='/imgs/part%02d/' % (int(temp2[1])/100000)
-		toadd2= '%08d.jpg' %  (int(temp2[1])+1)
-		
+            temp=NNdetails[iNN]
+            temp2=temp.split('_')
+            toadd='/imgs/part%02d/' % (int(temp2[1])/100000)
+            toadd2= '%08d.jpg' %  (int(temp2[1])+1)
+            NNs[iQuery].append(toadd + toadd2)
+            NNs2[iQuery].append((int(temp2[1])))
+            distances[iQuery].append(float(distancesdetails[iNN]))  
 
-		NNs[iQuery].append(toadd + toadd2)
-		distances[iQuery].append(float(distancesdetails[iNN]))
+        core_concepts= np.zeros((len(NNs2[iQuery]),numwords))
+        startind=jc[np.array(NNs2[iQuery])]
+        endind=jc[np.array(NNs2[iQuery])+1]
+        # build core_concepts matrix. (text representation of the images closer to query image)
+        for iNN in range(len(NNs2[iQuery])):
+            core_concepts[iNN,ir[startind[iNN]:endind[iNN]]]=data[startind[iNN]:endind[iNN]]
+            core_concepts[iNN,exclude]=0
+            I = np.argsort(core_concepts[iNN,:])
+            I=I[-1::-1]
+            #candidates.extend(I[0:10])    #Only 10 best words for each query candidate    
+            #for iCand in candidates:
+            print(" ")
+            for iCand in I[0:10]:    
+                print(vocab[iCand][0][0])
+        
+    
+#        cand_representation.append(core_concepts)          
+#        I = np.argsort(core_concepts)
+#        I=I[-1::-1]    
+        
 
     output = template('front_end2', outlabel='Press process to see the full outputs', count=count , querys=querystext, NNs=NNs , distances=distances)
     return output
@@ -611,7 +649,7 @@ def do_search():
            toadd='/imgs/part%02d/' % (int(temp2[1])/100000)
            toadd2= '%08d.jpg' %  (int(temp2[1])+1)
            NNs2[iQuery].append(toadd + toadd2)
-           NNs[iQuery].append((int(temp2[1])+1))
+           NNs[iQuery].append((int(temp2[1])))
            distances[iQuery].append(float(distancesdetails[iNN]))
 
     numquery=len(NNtext)
@@ -620,7 +658,8 @@ def do_search():
     
     # Let's re weight the distances
     nndists2=np.exp(-1*distances/np.mean(distances));
-    
+    for i in range(numquery):
+        nndists2[i]= np.arange(1, 0, -0.05)
     
     # Step 1. Get a subset of candidate images to do retrieval that includes
     # - Most representative words of candidate images
@@ -630,7 +669,9 @@ def do_search():
     all_concepts=[]
     
     #exclude= [1 ,2,3,4,5,6,9,15,16,41,	122,	259,	678,	995,	1201,	1594,	1712,	2058,	2064,	2139,	2427,	3084,	5726,	13393,	14467,	15683,	16860,	23151,	23222,	46378,	58587]
-    exclude=[0, 1, 2, 3, 4, 5, 8, 14, 15, 4, 121, 258, 677, 994, 1200, 1593, 1711, 2057, 2063, 2138, 2426, 3083, 5725, 13392, 14466, 15682, 16859, 23150, 23221, 46377, 58586]
+    
+    #the real one
+    #exclude=[0, 1, 2, 3, 4, 5, 8, 14, 15, 4, 121, 258, 677, 994, 1200, 1593, 1711, 2057, 2063, 2138, 2426, 3083, 5725, 13392, 14466, 15682, 16859, 23150, 23221, 46377, 58586]
     
     candidates=[]
     cand_representation=[]
@@ -642,6 +683,7 @@ def do_search():
         # build core_concepts matrix. (text representation of the images closer to query image)
         for iNN in range(np.size(nndists2,1)):
             core_concepts[iNN,ir[startind[iNN]:endind[iNN]]]=data[startind[iNN]:endind[iNN]]
+            core_concepts[iNN,exclude]=0
         
         core_concepts2= np.dot(nndists2[iConc,:] , core_concepts)    
         if (iConc==0) :   
@@ -649,41 +691,72 @@ def do_search():
         else:
             core_concepts3=np.add(core_concepts3,core_concepts2)
     
-    mymax= max(max(core_concepts2),mymax)
-    cand_representation.append(core_concepts2)    
-    core_concepts2[exclude]=0
-    #I = argsort(a[:,i]), b=a[I,:]
-    I = np.argsort(core_concepts2)
-    I=I[-1::-1]    
-    #cand=core_concepts2[I]   values of the most important concepts
+        mymax= max(max(core_concepts2),mymax)
+        cand_representation.append(core_concepts2)    
+        core_concepts2[exclude]=0
+        core_concepts3[exclude]=0
+        #I = argsort(a[:,i]), b=a[I,:]
+        I = np.argsort(core_concepts2)
+        I=I[-1::-1]    
+        #cand=core_concepts2[I]   values of the most important concepts
+        numcandidates=min(len(core_concepts2.nonzero()[0]),10)
     
-    candidates.extend(I[0:10])    #Only 10 best words for each query candidate    
-    all_concepts.extend(I[10:200].tolist())
+        candidates.extend(I[0:numcandidates])    #Only 10 best words for each query candidate    
+#        all_concepts.extend(I[10:200].tolist())
+  
+    #candidates contain the first 10 better tag descriptors of each query  
+ #   for iCand in candidates:
+ #      print(vocab[iCand][0][0])
+        
+        
+    # Find new candidates using the current tag descriptors !! 
+    knum=200
+    newcand=[]
+    for iC1 in range(4):    #Explore for the first 4 concepts
+        #distances1= kdist[1:knum,candidates[iC1]]
+        candidates1=kcand[1:knum,candidates[iC1]]
+        for iC2 in range(4):    #Explore for the first 4 concepts of second image
+            #distances2= kdist[1:knum,candidates[10+iC2]]
+            candidates2=kcand[1:knum,candidates[10+iC2]]
+            temp=np.intersect1d(candidates1, candidates2)
+            if len(temp)>0:
+                #erase elements from stop list
+                to_erase=np.intersect1d(temp,exclude)
+                to_erase=np.in1d(temp,exclude)                
+                temp = temp[~to_erase]            
+                newcand.extend(temp)
+                candidates.extend(temp)
     
+    
+    for iCand in candidates:
+        print(vocab[iCand][0][0])
 
-    listcounts=Counter(all_concepts)    # Histogram of the words used for the remaining 190 words
-    num_common=max(listcounts.values())   # the maximun value that a common word apperares in the query terms
+    print(" ")
     
-    # create empty list of new common words between retrieved images 
+    for iCand in newcand:
+        print(vocab[iCand][0][0])
+
+
+#    # create empty list of new common words between retrieved images 
     new_concept=np.zeros((1,numwords))
     new_concept=new_concept[0]
+
+    if len(newcand)>0:
+        listcounts=Counter(newcand)    # Histogram of the words used for the remaining 190 words
+        num_common=max(listcounts.values())   # the maximun value that a common word apperares in the query terms
+    #    
+       
+        # Find the word concept common between the two outputs
+        for k, v in listcounts.items(): 
+          #if v > 1: 
+            if not (np.array(exclude)==k).any(): 
+                new_concept[k]=v*(mymax+1)/num_common
+                #candidates.append(k)
     
-    # Find the word concept common between the two outputs
-    for k, v in listcounts.items(): 
-      if v > 1: 
-        if not (np.array(exclude)==k).any(): 
-            new_concept[k]=v*(mymax+1)/num_common
-            candidates.append(k)
     
-    # obtain a list of candidates to retrieve from.
     
-    #ic1=True
-    #for iCand in candidates:
-    #    if ic1 :
-    #        list_candidates = (ir == iCand)
-    #        ic1=False
-    #    else:
-    #        list_candidates=eOr(list_candidates , (ir == iCand))
+    # obtain a list of candidates to retrieve from.    
+
     posit=[]
     for iCand in candidates:
         tempcand=np.where(ir==iCand)
@@ -703,13 +776,39 @@ def do_search():
     # text representation of the current search 
     text_representation=np.add(new_concept,core_concepts3)
     
+    print(" ")
+    I = np.argsort(core_concepts3)
+    I=I[-1::-1]
+    numcandidates=min(len(core_concepts3.nonzero()[0]),10)
+
+    for iCand in I[0:numcandidates]:    
+        print(vocab[iCand][0][0])
+
+    print(" ")
+    
+    I = np.argsort(new_concept)
+    I=I[-1::-1]
+    numcandidates=min(len(new_concept.nonzero()[0]),10)
+    for iCand in I[0:numcandidates]:    
+        print(vocab[iCand][0][0])  
+        
+    print(" ")
+    I = np.argsort(text_representation)
+    I=I[-1::-1]
+    numcandidates=min(len(text_representation.nonzero()[0]),30)
+    for iCand in I[0:numcandidates]:    
+        print (vocab[iCand][0][0])  
+    
+        
+    
     # Perform tf-idf. Each non zero word determines a candidate set of images(from BoWT). 
     # Get an score of the search representation on the candidate images 
     scores=np.zeros((1,len(list_candidates)))
     scores=scores[0]
-    for iConcept in text_representation.nonzero()[0]:
-        #tmpscore=text_representation[iConcept]* M[iConcept,list_candidates].toarray()[0]
-        tmpscore=(text_representation[iConcept]/freq[iConcept])* M[iConcept,list_candidates].toarray()[0]
+#    for iConcept in text_representation.nonzero()[0]:    
+#        tmpscore=(text_representation[iConcept]/freq[iConcept])* M[iConcept,list_candidates].toarray()[0]
+    for iConcept in core_concepts3.nonzero()[0]:    
+        tmpscore=(core_concepts3[iConcept]/freq[iConcept])* M[iConcept,list_candidates].toarray()[0]        
         scores=np.add(scores,tmpscore)
     
     # retrieve images

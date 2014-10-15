@@ -27,7 +27,14 @@ from collections import Counter
 
 
 numwords=77488
+contents=sio.loadmat('/home/ashan/gonzalo/ECCV2014/BingChallenge/vocab.mat')
+vocab=contents['vocab']
 
+contents=sio.loadmat('/home/ashan/gonzalo/ECCV2014/BingChallenge/kdist.mat');
+kdist=contents['kdist']
+
+contents=sio.loadmat('/home/ashan/gonzalo/ECCV2014/BingChallenge/kcand.mat');
+kcand=contents['kcand']
 
 
 def eAnd(*args):
@@ -128,6 +135,8 @@ freq=contents['freq']
 
 # Let's re weight the distances
 nndists2=np.exp(-1*distances/np.mean(distances));
+for i in range(numquery):
+  nndists2[i]= np.arange(1, 0, -0.05)
 
 
 # Step 1. Get a subset of candidate images to do retrieval that includes
@@ -168,20 +177,51 @@ for iConc in range(numquery):
     candidates.extend(I[0:10])    #Only 10 best words for each query candidate    
     all_concepts.extend(I[10:200].tolist())
     
+for iCand in candidates:
+  print(vocab[iCand][0][0])
 
-listcounts=Counter(all_concepts)    # Histogram of the words used for the remaining 190 words
+knum=500
+newcand=[]
+for iC1 in range(4):    #Explore for the first 4 concepts
+    distances1= kdist[1:knum,candidates[iC1]]
+    candidates1=kcand[1:knum,candidates[iC1]]
+    for iC2 in range(4):    #Explore for the first 4 concepts of second image
+            distances2= kdist[1:knum,candidates[10+iC2]]
+            candidates2=kcand[1:knum,candidates[10+iC2]]
+            temp=np.intersect1d(candidates1, candidates2)
+            if len(temp)>0:
+                #erase elements from stop list
+                to_erase=np.intersect1d(temp,exclude)
+                to_erase=np.in1d(temp,exclude)                
+                temp = temp[~to_erase]            
+                newcand.extend(temp)
+                candidates.extend(temp)
+                
+            
+#if len(newcand)>0
+                
+            
+for iCand in candidates:
+    print(vocab[iCand][0][0])
+                
+    
+
+#
+listcounts=Counter(newcand)    # Histogram of the words used for the remaining 190 words
 num_common=max(listcounts.values())   # the maximun value that a common word apperares in the query terms
-
-# create empty list of new common words between retrieved images 
+#
+## create empty list of new common words between retrieved images 
 new_concept=np.zeros((1,numwords))
 new_concept=new_concept[0]
-
-# Find the word concept common between the two outputs
+#
+## Find the word concept common between the two outputs
 for k, v in listcounts.items(): 
   if v > 1: 
     if not (np.array(exclude)==k).any(): 
         new_concept[k]=v*(mymax+1)/num_common
         candidates.append(k)
+
+
 
 # obtain a list of candidates to retrieve from.
 

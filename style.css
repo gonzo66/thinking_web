@@ -8,7 +8,7 @@ This CSS is mainly borrowed from Tomasz Malisiewicz  people.csail.mit.edu/tomasz
 body {
 	margin:30px;
 	background-color: #becdd6; /*#6F9CCE*/
-	font-family: 'Maven Pro';
+	font-family: 'Minion';
 	font-size:13pt;
 	font-weight:normal;
 	text-align : center;
@@ -19,14 +19,14 @@ body {
 }
 
 @font-face {
-  font-family: 'Oldenburg';
+  font-family: 'Palatino;
   font-style: normal;
   font-weight: 400;
   src: local('Oldenburg'), local('Oldenburg-Regular'), url(http://themes.googleusercontent.com/static/fonts/oldenburg/v2/CRS5ubi7Czjub7bFdKPY-T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
 }
 
 @font-face {
-  font-family: 'Oxygen';
+  font-family: 'Garamond';
   font-style: normal;
   font-weight: 400;
   src: local('Oxygen'), local('Oxygen-Regular'), url(http://themes.googleusercontent.com/static/fonts/oxygen/v3/RzoNiRR1p2Mqyyz2RwqSMw.woff) format('woff');
@@ -34,7 +34,7 @@ body {
 
 
 @font-face {
-  font-family: 'Ubuntu';
+  font-family: 'Verdana';
   font-style: normal;
   font-weight: 400;
   src: local('Ubuntu'), url(http://themes.googleusercontent.com/static/fonts/ubuntu/v5/_xyN3apAT_yRRDeqB3sPRg.woff) format('woff');
@@ -94,7 +94,7 @@ table {
 	font-weight:normal;
 	text-align : left;
 	padding: 15px 0px;
-	font-family: 'Oldenburg';
+	font-family: "Times New Roman", Georgia, Serif;
 	/* font-variant: small-caps; */
 }
 
@@ -207,7 +207,7 @@ table {
 
 .paper-title {
 	/*font-weight: bold;*/
-	font-family: 'Maven Pro';
+	font-family: 'Minion';
 }
 
 .paper-image {
@@ -216,11 +216,11 @@ table {
 }
 
 h2 {
-	font-family: 'Maven Pro';
+	font-family: 'Minion';
 }
 
 .publication-lens .publication-title {
-	font-family: 'Maven Pro';
+	font-family: 'Minion';
 }
 
 .lowercase-number {
